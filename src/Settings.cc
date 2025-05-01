@@ -337,6 +337,17 @@ namespace ORB_SLAM3 {
         if(cameraType_ == Rectified){
             b_ = readParameter<float>(fSettings,"Stereo.b",found);
             bf_ = b_ * calibration1_->getParameter(0);
+
+            //Read intrinsic parameters
+            float fx = readParameter<float>(fSettings,"Camera2.fx",found);
+            float fy = readParameter<float>(fSettings,"Camera2.fy",found);
+            float cx = readParameter<float>(fSettings,"Camera2.cx",found);
+            float cy = readParameter<float>(fSettings,"Camera2.cy",found);
+
+            vCalibration = {fx, fy, cx, cy};
+
+            calibration2_ = new Pinhole(vCalibration);
+            originalCalib2_ = new Pinhole(vCalibration);
         }
         else{
             cv::Mat cvTlr = readParameter<cv::Mat>(fSettings,"Stereo.T_c1_c2",found);
@@ -551,6 +562,8 @@ namespace ORB_SLAM3 {
         }
 
         if(settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO){
+            output << settings.cameraType_ << "; " << (settings.cameraType_ == Settings::PinHole) << "; " << (settings.cameraType_ ==  Settings::Rectified) << endl;
+            output << settings.originalCalib2_->size() << endl;
             output << "\t-Camera 2 parameters (";
             if(settings.cameraType_ == Settings::PinHole || settings.cameraType_ ==  Settings::Rectified){
                 output << "Pinhole";
